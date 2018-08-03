@@ -1,0 +1,5 @@
+#exclude folders
+.vagrant/
+
+#exclude files
+.gitignore.swp
