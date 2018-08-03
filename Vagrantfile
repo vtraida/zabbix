@@ -15,7 +15,7 @@ srv.vm.provider :virtualbox do |vbox|
 
 config.vm.provision "shell", inline: "echo Hello"
 
-#config.vm.provision :shell, path: "install_python.sh"
+config.vm.provision :shell, path: "install_stuff.sh"
 #config.vm.provision "ansible" do |ansible|
 # ansible.playbook = "jenkins_install.yml
 
