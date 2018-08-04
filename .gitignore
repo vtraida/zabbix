@@ -3,3 +3,4 @@
 
 #exclude files
 .gitignore.swp
+test*
