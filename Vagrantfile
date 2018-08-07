@@ -9,6 +9,7 @@ srv.vm.network :private_network, ip: "192.168.61.101"
 srv.vm.network :"public_network" , bridge: [
   "enp0s31f6",
   "wlp2s0",
+  "en0: Wi-Fi (AirPort)"
 ]
 srv.vm.network "forwarded_port", guest: 80, host:8010
 srv.vm.provider :virtualbox do |vbox|
