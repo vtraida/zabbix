@@ -14,6 +14,7 @@ srv.vm.network :"public_network" , bridge: [
 srv.vm.network "forwarded_port", guest: 80, host:8010
 srv.vm.provider :virtualbox do |vbox|
   vbox.name = "srvzab"
+  vbox.memory = 1024
   end
  end
 
