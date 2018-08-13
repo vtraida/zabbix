@@ -1,5 +1,5 @@
 ---
-#install zabbix - centos 7.5
+#install zabbix - centos 7.5 with enabled SELinux
 - hosts: all
   become: yes
   tasks: 
@@ -31,9 +31,12 @@
         - mc
         - mariadb-server
         - policycoreutils-python
+        - setroubleshoot 
+        - setroubleshoot-server
+        - MySQL-python
         
 
-    - name: Zabbix frontend additional packages enable repository of optional rpms
+    - name: zabbix frontend additional packages enable repository of optional rpms
       shell: yum-config-manager --enable rhel-7-server-optional-rpms
     - name: install zabbix
       yum:
@@ -44,4 +47,34 @@
         - zabbix-server-mysql
         - zabbix-web-mysql
         - zabbix-agent
+    - name: database changes
       
+    - name: services enabled
+      service:
+       name: "{{ enabled_items }}"
+       enabled: yes
+      vars:
+       enebled_items:
+       - mariadb-server
+       - httpd
+       - zabbix-server
+       - zabbix-agent
+    - name: services start
+      service:
+       name: "{{ enabled_items }}"
+       enabled: yes
+      vars:
+       enebled_items:
+       - mariadb-server
+       - httpd
+       - zabbix-server
+       - zabbix-agent
+    - name: services restart
+      #sudo service auditd restart
+      service:
+       name: "{{ restart_items }}"
+       state: reloaded
+      vars:
+       restart_items:
+       - auditd
+       - httpd
