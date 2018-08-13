@@ -1,11 +1,12 @@
 ---
-- name install zabbix
-- hosts: zabbix-test-vm01
+#install zabbix - centos 7.5
+- hosts: all
   become: yes
   tasks: 
     - name: update all packages
       yum:
         name: "*"
+        update_cache: yes
         state: latest
     - name: add repository - zabbix
       #https://docs.ansible.com/ansible/latest/modules/yum_module.html
@@ -29,12 +30,16 @@
         - vim
         - mc
         - mariadb-server
+        - policycoreutils-python
+        
 
     - name: Zabbix frontend additional packages enable repository of optional rpms
       shell: yum-config-manager --enable rhel-7-server-optional-rpms
     - name: install zabbix
       yum:
-        name: {{ zbx_packages }}
+        name: "{{ zbx_packages }}"
+        state: present
+      vars:
         zbx_packages:
         - zabbix-server-mysql
         - zabbix-web-mysql

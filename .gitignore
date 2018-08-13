@@ -4,3 +4,5 @@
 #exclude files
 .gitignore.swp
 test*
+*.log
+*.retry
