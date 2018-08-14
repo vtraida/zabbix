@@ -2,13 +2,16 @@
 #install zabbix - centos 7.5 with enabled SELinux
 - hosts: all
   become: yes
+  vars:
+   mysql_root_password: enter@your@password111
+   mysql_zabbix_password: enter@your@password123 
   tasks: 
-    - name: update all packages
+    - name: Update all packages
       yum:
         name: "*"
         update_cache: yes
         state: latest
-    - name: add repository - zabbix
+    - name: Add repository - zabbix 3.4.2
       #https://docs.ansible.com/ansible/latest/modules/yum_module.html
       #However, if one of the packages adds a new yum repository 
       #that the other packages come from (such as epel-release) 
@@ -17,7 +20,7 @@
         name: https://repo.zabbix.com/zabbix/3.4/rhel/7/x86_64/zabbix-release-3.4-2.el7.noarch.rpm
         state: present 
    
-    - name: ensure a list of packages installed
+    - name: Ensure a list of packages installed
       yum:
         name: "{{ packages }}"
         state: latest
@@ -34,11 +37,12 @@
         - setroubleshoot 
         - setroubleshoot-server
         - MySQL-python
+        - libsemanage-python
         
 
-    - name: zabbix frontend additional packages enable repository of optional rpms
+    - name: Zabbix frontend additional packages enable repository of optional rpms
       shell: yum-config-manager --enable rhel-7-server-optional-rpms
-    - name: install zabbix
+    - name: Install zabbix
       yum:
         name: "{{ zbx_packages }}"
         state: present
@@ -47,9 +51,7 @@
         - zabbix-server-mysql
         - zabbix-web-mysql
         - zabbix-agent
-    - name: database changes
-      
-    - name: services enabled
+    - name: Services enabled
       service:
        name: "{{ enabled_items }}"
        enabled: yes
@@ -59,18 +61,17 @@
        - httpd
        - zabbix-server
        - zabbix-agent
-    - name: services start
+    - name: Services start
       service:
-       name: "{{ enabled_items }}"
-       enabled: yes
+       name: "{{ started_items }}"
+       state: started
       vars:
-       enebled_items:
+       started_items:
        - mariadb-server
        - httpd
        - zabbix-server
        - zabbix-agent
-    - name: services restart
-      #sudo service auditd restart
+    - name: Services restart
       service:
        name: "{{ restart_items }}"
        state: reloaded
@@ -78,3 +79,22 @@
        restart_items:
        - auditd
        - httpd
+    - name: Database changes
+    #https://stackoverflow.com/questions/25136498/ansible-answers-to-mysql-secure-installation
+      yum: name=MySQL-python state=present
+      when: ansible_os_family == 'RedHat'
+    - name: Sets the root password 
+      mysql_user: user=root password="{{ mysql_root_password }}" host=localhost
+    - name: Deletes anonymous MySQL server user for localhost
+      mysql_user: user="" state="absent"  
+    - name: Secures the MySQL root user - disallow root login remotely
+      mysql_user: user="root" password="{{ mysql_root_password }}" host="{{root_host_list}}"
+      vars:
+        root_host_list:
+        - ::1
+        - localhost
+        - 127.0.0.1
+    - name: Removes the MySQL test database
+      mysql_db: db=test state=absent  
+    - name: Create zabbix database
+      mysql_db: db=zabbix state=present encoding=utf8

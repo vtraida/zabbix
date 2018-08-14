@@ -1,6 +1,6 @@
 Vagrant.configure("2") do |config|
 config.vm.box = "centos/7"
-
+HOST_HOSTNAME= 'hostname.strip'
 #zabbix server
 config.vm.define "srv-zab" do |srv|
 #srv.config.vm.box = "centos/7"
@@ -22,7 +22,7 @@ srv.vm.provider :virtualbox do |vbox|
 
 config.vm.define "srv-zab01" do |srv1|
 #srv1.config.vm.box = "centos/7"
-srv1.vm.hostname = "srvzab01.test"
+srv1.vm.hostname = "#{HOST_HOSTNAME}t#{rand(20..99)}"+".kyiv.epam.com"
 srv1.vm.network :private_network, ip: "192.168.61.102"
 srv1.vm.network :"public_network" , bridge: [
   "enp0s31f6",
