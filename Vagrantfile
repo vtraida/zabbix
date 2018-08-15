@@ -1,6 +1,6 @@
 Vagrant.configure("2") do |config|
 config.vm.box = "centos/7"
-HOST_HOSTNAME= 'hostname.strip'
+HOST_HOSTNAME= `hostname`.strip
 #zabbix server
 config.vm.define "srv-zab" do |srv|
 #srv.config.vm.box = "centos/7"

@@ -1,0 +1,9 @@
+#httpd vars
+php_time_zone: Europe/Kiev
+#zabbix_server.conf vars
+db_host_mysql: localhost
+db_name_mysql: zabbix
+db_username_mysql: zabbix
+db_password_mysql: enter@your@password123
+#mysql server vars
+mysql_root_password: enter@your@password111

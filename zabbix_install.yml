@@ -83,9 +83,7 @@
     #https://stackoverflow.com/questions/25136498/ansible-answers-to-mysql-secure-installation
       yum: name=MySQL-python state=present
       when: ansible_os_family == 'RedHat'
-    - name: Sets the root password 
-      mysql_user: user=root password="{{ mysql_root_password }}" host=localhost
-    - name: Deletes anonymous MySQL server user for localhost
+    - name: Deletes anonymous MySQL server user for localhos
       mysql_user: user="" state="absent"  
     - name: Secures the MySQL root user - disallow root login remotely
       mysql_user: user="root" password="{{ mysql_root_password }}" host="{{root_host_list}}"
@@ -96,5 +94,21 @@
         - 127.0.0.1
     - name: Removes the MySQL test database
       mysql_db: db=test state=absent  
+    - name: Sets the root password 
+      mysql_user: user=root password="{{ mysql_root_password }}" host=localhost
     - name: Create zabbix database
       mysql_db: db=zabbix state=present encoding=utf8
+      login_user: root 
+      login_password: "{{ mysql_root_password }}"
+    - name: Create zabbix db user "zabbix"
+      login_user: root 
+      login_password: "{{ mysql_root_password }}"
+      mysql_user: name=zabbix password="{{ mysql_zabbix_password }}" priv="zabbix.*:ALL" state=present
+    - name: Restore database from backup/template
+      login_user: root 
+      login_password: "{{ mysql_root_password }}"
+      mysql_db: name=zabbix state=import target=/usr/share/doc/zabbix-server-mysql*/create.sql.gz
+    - name: Configure database for Zabbix server
+      template: src=zabbix_server.conf dest={{zabbix_conf_path}} mode="u=rw,g=r,o=r"
+    - name: Zabbix frontend configuration
+      template: src=zabbix_httpd.conf dest=/etc/httpd/conf.d/zabbix.conf
