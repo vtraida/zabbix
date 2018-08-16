@@ -7,3 +7,6 @@ db_username_mysql: zabbix
 db_password_mysql: enter@your@password123
 #mysql server vars
 mysql_root_password: enter@your@password111
+#zabbix config path
+zabbix_conf_path: /etc/zabbix/zabbix_server.conf
+zabbix_httpd_conf_path: /etc/httpd/conf.d/zabbix.conf

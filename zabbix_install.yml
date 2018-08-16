@@ -38,6 +38,7 @@
         - setroubleshoot-server
         - MySQL-python
         - libsemanage-python
+        - libselinux-python
         
 
     - name: Zabbix frontend additional packages enable repository of optional rpms
@@ -109,6 +110,39 @@
       login_password: "{{ mysql_root_password }}"
       mysql_db: name=zabbix state=import target=/usr/share/doc/zabbix-server-mysql*/create.sql.gz
     - name: Configure database for Zabbix server
-      template: src=zabbix_server.conf dest={{zabbix_conf_path}} mode="u=rw,g=r,o=r"
-    - name: Zabbix frontend configuration
-      template: src=zabbix_httpd.conf dest=/etc/httpd/conf.d/zabbix.conf
+      template: src=/templates/zabbix_server_conf.j2 dest={{zabbix_conf_path}} 
+                owner=root group=zabbix mode=0640 backup=yes
+    - name: Zabbix frontend configuration - apache
+      template: src=/templates/zabbix_httpd_conf.j2 dest={{zabbix_httpd_conf_path}}
+                owner=root group=root mode=0644 backup=yes
+                validate:='httpd -t -f %s' #https://www.blue-bag.com/blog/testing-configuration-files-they-go-live-ansible 
+      when:  httpd_result|success
+  
+      notify:
+      - restart httpd
+    - name: Enable zabbix_can_network SELinux boolean
+      seboolean:
+        name: zabbix_can_network
+        state: yes
+        persistent: yes
+    - name: Enable httpd_can_connect_zabbix SELinux boolean
+      seboolean:
+        name: httpd_can_connect_zabbix
+        state: yes
+        persistent: yes
+    - name: Enable httpd_can_network_connect_db SELinux boolean
+      seboolean:
+        name: httpd_can_network_connect_db
+        state: yes
+        persistent: yes    
+    - name: Resolving issue > "python SELinux is preventing /usr/sbin/zabbix_server_mysql from unlink access 
+            on the sock_file zabbix_server_preprocessing.sock.#012#012*****  |
+            Plugin catchall (100. confidence) suggests   **************************#012#012|
+            If you believe that zabbix_server_mysql should be allowed unlink access on 
+            the zabbix_server_preprocessing.sock sock_file by default.#012Then you should report this as a 
+            bug.#012You can generate a local policy module to allow this access.#012Do#012allow this access 
+            for now by executing:#012# 
+            ausearch -c 'zabbix_server' --raw | audit2allow -M my-zabbixserver#012# 
+            semodule -i my-zabbixserver.pp#012"
+      shell: ausearch -c 'zabbix_server' --raw | audit2allow -M my-zabbixserver && semodule -i my-zabbixserver.pp
+      
