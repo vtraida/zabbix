@@ -1,0 +1,40 @@
+---
+- name: Installing mariadb-server
+  yum: 
+     name: mariadb-server
+     state: present  
+     update_cache: yes
+- name: Installing mariadb-server dependency
+  yum: 
+    name: MySQL-python
+    state: present
+- name: Starting mariadb-server and add to start on boot
+  service:
+    name: mariadb.service
+    state: started 
+    enabled: yes
+# https://stackoverflow.com/questions/25136498/ansible-answers-to-mysql-secure-installation  
+- name: running steps from mysql_secure_installation.sh >>> deleting anonymous MySQL server user for localhos
+  mysql_user:
+    name: ''
+    host: localhost
+    state: absent
+- name: Securing the MySQL root user - disallow root login remotely
+  mysql_user: 
+    name: 'root' 
+    password: '{{ mysql_root_password }}' 
+    host: '{{root_host_list}}'
+  vars:
+      root_host_list:
+      - ::1
+      - localhost
+      - 127.0.0.1
+- name: Removing the MySQL test database
+  mysql_db: 
+    db: test 
+    state: absent
+- name: Setting the root password 
+  mysql_user: 
+    name: root 
+    password: '{{ mysql_root_password }}' 
+    host: localhost
