@@ -1,0 +1,6 @@
+---
+- name: Installing httpd
+  yum:
+    name: httpd
+    state: present
+    update_cache: yes
