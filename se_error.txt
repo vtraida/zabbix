@@ -99,3 +99,15 @@ type=SYSCALL msg=audit(1535468057.5:1334): arch=x86_64 syscall=unlink success=no
 Hash: zabbix_server,zabbix_t,zabbix_var_run_t,sock_file,unlink
 
 
+
+
+
+
+
+
+Aug 28 15:27:45 localhost kernel: SELinux:  Context unconfined_u:unconfined_r:sandbox_t:s0-s0:c0.c1023 became invalid (unmapped).
+Aug 28 15:27:45 localhost kernel: SELinux:  Context system_u:unconfined_r:sandbox_t:s0-s0:c0.c1023 became invalid (unmapped).
+Aug 28 15:27:46 localhost dbus[563]: [system] Reloaded configuration
+
+
+
