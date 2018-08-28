@@ -108,7 +108,7 @@
 - name: Services restart - auditd
   service:
     name: auditd
-    state: restarted
+    state: reloaded
 - name: Starting services
   service:
     name: "{{ item }}"
@@ -139,7 +139,7 @@
 # a local policy module to allow this access.#012Do#012allow this access for now by executing:
 #012# ausearch -c 'zabbix_server' --raw | audit2allow -M my-zabbixserver#012# semodule -i my-zabbixserver.pp#012"
 - name: resolve SE issue - step 1
-  shell: ausearch -c 'zabbix_server' --raw | audit2allow -M my-zabbixserver && semodule -i my-zabbixserver.pp
+  shell: ausearch -c 'zabbix_server' --raw | audit2allow -M my-zabbixserver
 - name: resolve SE issue - step 2
   shell: semodule -i my-zabbixserver.pp  
 - name: Starting services 
