@@ -38,6 +38,7 @@ srv1.vm.provider :virtualbox do |vbox|
 
 
 config.vm.provision "shell", inline: "echo Hello"
+config.vm.provision "shell", inline: "ip -c a"
 config.vm.provision "file", source: "~/key/vtraida-18key.pub", destination: "~/.ssh/me.pub"
 config.vm.provision 'shell', inline: "cat /home/vagrant/.ssh/me.pub>>/home/vagrant/.ssh/authorized_keys"
 

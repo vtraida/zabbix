@@ -10,3 +10,7 @@ mysql_root_password: enter@your@password111
 #zabbix config path
 zabbix_conf_path: /etc/zabbix/zabbix_server.conf
 zabbix_httpd_conf_path: /etc/httpd/conf.d/zabbix.conf
+zabbix_conf_php: /etc/zabbix/web/zabbix.conf.php
+
+#zabbix_db
+mysql_zabbix_password: enter@your@password777

@@ -1,2 +1,151 @@
 ---
-# tasks file for role
+- name: Adding repository - zabbix 3.4.2
+      #https://docs.ansible.com/ansible/latest/modules/yum_module.html
+      #However, if one of the packages adds a new yum repository 
+      #that the other packages come from (such as epel-release) 
+      #then that package needs to be installed in a separate task. This mimics yum’s command line behaviour.
+  yum:
+    name: https://repo.zabbix.com/zabbix/3.4/rhel/7/x86_64/zabbix-release-3.4-2.el7.noarch.rpm
+    state: present 
+- name: Ensuring that list of packages installed
+  yum:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  with_items:
+    - yum-utils
+    - httpd
+    - curl
+    - vim
+    - mc
+    - mariadb-server
+    - policycoreutils-python
+    - setroubleshoot 
+    - setroubleshoot-server
+    - MySQL-python
+    - libsemanage-python
+    - libselinux-python
+- name: Zabbix frontend additional packages - enabling repository of optional rpms
+  shell: yum-config-manager --enable rhel-7-server-optional-rpms
+
+- name: Create zabbix database
+  mysql_db: 
+    db: zabbix 
+    state: present 
+    encoding: utf8
+    login_user: root 
+    login_password: "{{ mysql_root_password }}"
+- name: Create zabbix db user "zabbix"
+  mysql_user: 
+    name: zabbix
+    password: enter@your@password123 
+#    password: "{{ mysql_zabbix_password }}" 
+    priv: "zabbix.*:ALL" 
+    state: present
+    login_user: root 
+    login_password: "{{ mysql_root_password }}"
+- name: Installing zabbix
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+     - zabbix-server-mysql
+     - zabbix-web-mysql
+     - zabbix-agent 
+- name: Restoring database from backup/template
+  mysql_db: 
+    name: zabbix 
+    state: import 
+    target: /usr/share/doc/zabbix-server-mysql-3.4.13/create.sql.gz
+    login_user: root 
+    login_password: "{{ mysql_root_password }}"
+  ignore_errors: yes  
+   
+- name: Configure database for Zabbix server
+  template: 
+    src: zabbix_server_conf.j2 
+    dest: "{{zabbix_conf_path}}"
+    owner: root 
+    group: zabbix 
+    mode: 0640 
+    backup: yes
+- name: Zabbix frontend configuration - apache
+  template: 
+    src: zabbix_httpd_conf.j2 
+    dest: "{{zabbix_httpd_conf_path}}"
+    owner: root 
+    group: root 
+    mode: 0644 
+    backup: yes
+#    validate: 'httpd -t -f %s'
+###https://www.blue-bag.com/blog/testing-configuration-files-they-go-live-ansible 
+#    when: httpd_result|success
+  
+#    notify:
+#      - restart httpd
+- name: Enabling zabbix_can_network SELinux boolean
+  seboolean:
+        name: zabbix_can_network
+        state: yes
+        persistent: yes
+- name: Enabling httpd_can_connect_zabbix SELinux boolean
+  seboolean:
+        name: httpd_can_connect_zabbix
+        state: yes
+        persistent: yes
+- name: Enabling httpd_can_network_connect_db SELinux boolean
+  seboolean:
+        name: httpd_can_network_connect_db
+        state: yes
+        persistent: yes    
+- name: Enabling services
+  service:
+    name: "{{ item }}"
+    enabled: yes
+  with_items:
+     - zabbix-server
+     - zabbix-agent
+- name: Services restart - auditd
+  service:
+    name: auditd
+    state: restarted
+- name: Starting services
+  service:
+    name: "{{ item }}"
+    state: started
+  with_items:
+     - zabbix-server
+     - zabbix-agent
+- name: Configure php conf for Zabbix server
+  template: 
+    src: zabbix_conf_php.j2
+    dest: /etc/zabbix/web/zabbix.conf.php
+    owner: apache 
+    group: apache 
+    mode: 0644 
+    backup: yes
+- name: Services restart - httpd
+  service:
+    name: httpd
+    state: restarted
+#- name: Resolving issue > "setroubleshoot: SELinux is preventing /usr/sbin/zabbix_server_mysql from create 
+#access on the sock_file zabbix_server_alerter.sock. For complete SELinux messages run>
+#sealert -l 3fe98020-a54c-47ea-a998-acd734d8b453
+#Aug 28 13:46:53 localhost python> SELinux is preventing /usr/sbin/zabbix_server_mysql from create access 
+#on the sock_file zabbix_server_alerter.sock.#012#012*****  
+#Plugin catchall (100. confidence) suggests
+#012#012If you believe that zabbix_server_mysql should be allowed create access on the 
+#zabbix_server_alerter.sock sock_file by default.#012Then you should report this as a bug.#012You can generate
+# a local policy module to allow this access.#012Do#012allow this access for now by executing:
+#012# ausearch -c 'zabbix_server' --raw | audit2allow -M my-zabbixserver#012# semodule -i my-zabbixserver.pp#012"
+- name: resolve SE issue - step 1
+  shell: ausearch -c 'zabbix_server' --raw | audit2allow -M my-zabbixserver && semodule -i my-zabbixserver.pp
+- name: resolve SE issue - step 2
+  shell: semodule -i my-zabbixserver.pp  
+- name: Starting services 
+  service:
+    name: "{{ item }}"
+    state: started
+  with_items:
+     - zabbix-server
+     - zabbix-agent 

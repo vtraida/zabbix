@@ -5,7 +5,7 @@
 10.??.??.?? ansible_port=22 ansible_user=vagrant
 
 [zabbix-test-vm02] 
-10.25.13.227 ansible_port=22 ansible_user=vagrant 
+10.25.13.194 ansible_port=22 ansible_user=vagrant 
 #ANSIBLE_SSH_ARGS='-o UserKnownHostsFile=/dev/null' 
 
 [zabbix-proxmox]

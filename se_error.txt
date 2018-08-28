@@ -1,0 +1,101 @@
+setroubleshoot: SELinux is preventing /usr/sbin/zabbix_server_mysql from create access on the sock_file zabbix_server_alerter.sock. For complete SELinux messages run: sealert -l 3fe98020-a54c-47ea-a998-acd734d8b453
+Aug 28 13:46:53 localhost python: SELinux is preventing /usr/sbin/zabbix_server_mysql from create access on the sock_file zabbix_server_alerter.sock.#012#012*****  Plugin catchall (100. confidence) suggests   **************************#012#012If you believe that zabbix_server_mysql should be allowed create access on the zabbix_server_alerter.sock sock_file by default.#012Then you should report this as a bug.#012You can generate a local policy module to allow this access.#012Do#012allow this access for now by executing:#012# ausearch -c 'zabbix_server' --raw | audit2allow -M my-zabbixserver#012# semodule -i my-zabbixserver.pp#012
+
+Aug 28 14:52:09 epualviw0001t40 setroubleshoot: SELinux is preventing /usr/sbin/zabbix_server_mysql from unlink access on the sock_file zabbix_server_alerter.sock. For complete SELinux messages run: sealert -l 331190f1-50de-490f-8c79-3c43d8fde992
+Aug 28 14:52:09 epualviw0001t40 python: SELinux is preventing /usr/sbin/zabbix_server_mysql from unlink access on the sock_file zabbix_server_alerter.sock.#012#012*****  Plugin catchall (100. confidence) suggests   **************************#012#012If you believe that zabbix_server_mysql should be allowed unlink access on the zabbix_server_alerter.sock sock_file by default.#012Then you should report this as a bug.#012You can generate a local policy module to allow this access.#012Do#012allow this access for now by executing:#012# ausearch -c 'zabbix_server' --raw | audit2allow -M my-zabbixserver#012# semodule -i my-zabbixserver.pp#012
+
+
+
+[root@epualviw0001t40 ~]# sealert -l 3fe98020-a54c-47ea-a998-acd734d8b453
+SELinux is preventing /usr/sbin/zabbix_server_mysql from create access on the sock_file zabbix_server_alerter.sock.
+
+*****  Plugin catchall (100. confidence) suggests   **************************
+
+If you believe that zabbix_server_mysql should be allowed create access on the zabbix_server_alerter.sock sock_file by default.
+Then you should report this as a bug.
+You can generate a local policy module to allow this access.
+Do
+allow this access for now by executing:
+# ausearch -c 'zabbix_server' --raw | audit2allow -M my-zabbixserver
+# semodule -i my-zabbixserver.pp
+
+
+Additional Information:
+Source Context                system_u:system_r:zabbix_t:s0
+Target Context                system_u:object_r:zabbix_var_run_t:s0
+Target Objects                zabbix_server_alerter.sock [ sock_file ]
+Source                        zabbix_server
+Source Path                   /usr/sbin/zabbix_server_mysql
+Port                          <Unknown>
+Host                          epualviw0001t40.kyiv.epam.com
+Source RPM Packages           
+Target RPM Packages           
+Policy RPM                    selinux-policy-3.13.1-192.el7_5.3.noarch
+Selinux Enabled               True
+Policy Type                   targeted
+Enforcing Mode                Enforcing
+Host Name                     epualviw0001t40.kyiv.epam.com
+Platform                      Linux epualviw0001t40.kyiv.epam.com
+                              3.10.0-862.2.3.el7.x86_64 #1 SMP Wed May 9
+                              18:05:47 UTC 2018 x86_64 x86_64
+Alert Count                   13
+First Seen                    2018-08-28 13:44:22 UTC
+Last Seen                     2018-08-28 13:46:49 UTC
+Local ID                      3fe98020-a54c-47ea-a998-acd734d8b453
+
+Raw Audit Messages
+type=AVC msg=audit(1535464009.933:6721): avc:  denied  { create } for  pid=9418 comm="zabbix_server" name="zabbix_server_alerter.sock" scontext=system_u:system_r:zabbix_t:s0 tcontext=system_u:object_r:zabbix_var_run_t:s0 tclass=sock_file
+
+
+Hash: zabbix_server,zabbix_t,zabbix_var_run_t,sock_file,create
+
+[root@epualviw0001t40 ~]# 
+
+
+
+[root@epualviw0001t51 ~]# sealert -l 331190f1-50de-490f-8c79-3c43d8fde992
+SELinux is preventing /usr/sbin/zabbix_server_mysql from unlink access on the sock_file zabbix_server_preprocessing.sock.
+
+*****  Plugin catchall (100. confidence) suggests   **************************
+
+If you believe that zabbix_server_mysql should be allowed unlink access on the zabbix_server_preprocessing.sock sock_file by default.
+Then you should report this as a bug.
+You can generate a local policy module to allow this access.
+Do
+allow this access for now by executing:
+# ausearch -c 'zabbix_server' --raw | audit2allow -M my-zabbixserver
+# semodule -i my-zabbixserver.pp
+
+
+Additional Information:
+Source Context                system_u:system_r:zabbix_t:s0
+Target Context                system_u:object_r:zabbix_var_run_t:s0
+Target Objects                zabbix_server_preprocessing.sock [ sock_file ]
+Source                        zabbix_server
+Source Path                   /usr/sbin/zabbix_server_mysql
+Port                          <Unknown>
+Host                          epualviw0001t40.kyiv.epam.com
+Source RPM Packages           zabbix-server-mysql-3.4.13-1.el7.x86_64
+Target RPM Packages           
+Policy RPM                    selinux-policy-3.13.1-192.el7_5.3.noarch
+Selinux Enabled               True
+Policy Type                   targeted
+Enforcing Mode                Enforcing
+Host Name                     epualviw0001t51.kyiv.epam.com
+Platform                      Linux epualviw0001t51.kyiv.epam.com
+                              3.10.0-862.2.3.el7.x86_64 #1 SMP Wed May 9
+                              18:05:47 UTC 2018 x86_64 x86_64
+Alert Count                   41
+First Seen                    2018-08-28 14:45:37 UTC
+Last Seen                     2018-08-28 14:54:17 UTC
+Local ID                      331190f1-50de-490f-8c79-3c43d8fde992
+
+Raw Audit Messages
+type=AVC msg=audit(1535468057.5:1334): avc:  denied  { unlink } for  pid=7321 comm="zabbix_server" name="zabbix_server_preprocessing.sock" dev="tmpfs" ino=23168 scontext=system_u:system_r:zabbix_t:s0 tcontext=system_u:object_r:zabbix_var_run_t:s0 tclass=sock_file
+
+
+type=SYSCALL msg=audit(1535468057.5:1334): arch=x86_64 syscall=unlink success=no exit=EACCES a0=555acccd07a0 a1=0 a2=7fdce889c7b8 a3=40 items=0 ppid=7287 pid=7321 auid=4294967295 uid=996 gid=993 euid=996 suid=996 fsuid=996 egid=993 sgid=993 fsgid=993 tty=(none) ses=4294967295 comm=zabbix_server exe=/usr/sbin/zabbix_server_mysql subj=system_u:system_r:zabbix_t:s0 key=(null)
+
+Hash: zabbix_server,zabbix_t,zabbix_var_run_t,sock_file,unlink
+
+

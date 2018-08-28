@@ -4,3 +4,8 @@
     name: httpd
     state: present
     update_cache: yes
+- name: Starting httpd and add to start on boot
+  service:
+    name: httpd
+    state: started 
+    enabled: yes
