@@ -32,7 +32,8 @@
 - name: Waiting before SELinux fix
   pause:
     minutes: 2
-- name: Resolving SE issue - step 1-1
+# SE module https://relativkreativ.at/articles/how-to-compile-a-selinux-policy-package
+    - name: Resolving SE issue - step 1-1
   shell: semodule -i zabbix_server.pp 
   args:
     chdir: /home/vagrant/module1

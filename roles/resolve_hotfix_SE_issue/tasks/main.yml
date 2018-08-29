@@ -1,4 +1,5 @@
 ---
+# SE module https://relativkreativ.at/articles/how-to-compile-a-selinux-policy-package
 - name: Creating directory for SElinux modules
   file:
     path: /home/vagrant/semodule
