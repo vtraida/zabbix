@@ -1,0 +1,40 @@
+---
+- name: Creating directory for SElinux modules
+  file:
+    path: /home/vagrant/semodule
+    state: directory
+    mode: 0755
+- name: Copying modules
+  copy:
+    src: "{{item}}"
+    dest: /home/vagrant/semodule
+  with_items:
+    - zabbix_server1.pp
+    - zabbix_server2.pp
+  tags:
+    - xxx  
+- name: Resolving SE issue - step 1-1
+  shell: semodule -i zabbix_server1.pp
+  args:
+    chdir: /home/vagrant/semodule
+  tags:
+    - copy
+- name: Resolving SE issue - step 1-2
+  shell: semodule -i zabbix_server2.pp
+  args:
+    chdir: /home/vagrant/semodule
+  tags:
+    - copy      
+
+- name: Reboot the machine
+  shell: nohup bash -c "sleep 2s && shutdown -r now" &
+
+- name: Wait for machine to come back
+  wait_for_connection:
+    timeout: 840
+    delay: 20
+
+- name: Zabbix status
+  shell: systemctl status zabbix-server
+  tags:
+    - check

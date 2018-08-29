@@ -1,0 +1,9 @@
+---
+- hosts: zabbix-test-vm02
+  become: yes
+  roles:
+     - mariadb_setup
+     - httpd_setup
+     - zabbix_install_role
+#     - resolve_SE_issue
+     - resolve_hotfix_SE_issue

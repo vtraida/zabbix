@@ -11,20 +11,25 @@
   yum:
     name: "{{ item }}"
     state: present
-    update_cache: yes
+    update_cache: no
   with_items:
     - yum-utils
-    - httpd
+#    - httpd
     - curl
     - vim
     - mc
-    - mariadb-server
+#    - mariadb-server
     - policycoreutils-python
+    - zip
     - setroubleshoot 
     - setroubleshoot-server
     - MySQL-python
     - libsemanage-python
     - libselinux-python
+- name: Services restart - auditd
+  service:
+    name: auditd
+    state: reloaded
 - name: Zabbix frontend additional packages - enabling repository of optional rpms
   shell: yum-config-manager --enable rhel-7-server-optional-rpms
 
@@ -105,10 +110,6 @@
   with_items:
      - zabbix-server
      - zabbix-agent
-- name: Services restart - auditd
-  service:
-    name: auditd
-    state: reloaded
 - name: Starting services
   service:
     name: "{{ item }}"
@@ -128,20 +129,6 @@
   service:
     name: httpd
     state: restarted
-#- name: Resolving issue > "setroubleshoot: SELinux is preventing /usr/sbin/zabbix_server_mysql from create 
-#access on the sock_file zabbix_server_alerter.sock. For complete SELinux messages run>
-#sealert -l 3fe98020-a54c-47ea-a998-acd734d8b453
-#Aug 28 13:46:53 localhost python> SELinux is preventing /usr/sbin/zabbix_server_mysql from create access 
-#on the sock_file zabbix_server_alerter.sock.#012#012*****  
-#Plugin catchall (100. confidence) suggests
-#012#012If you believe that zabbix_server_mysql should be allowed create access on the 
-#zabbix_server_alerter.sock sock_file by default.#012Then you should report this as a bug.#012You can generate
-# a local policy module to allow this access.#012Do#012allow this access for now by executing:
-#012# ausearch -c 'zabbix_server' --raw | audit2allow -M my-zabbixserver#012# semodule -i my-zabbixserver.pp#012"
-- name: resolve SE issue - step 1
-  shell: ausearch -c 'zabbix_server' --raw | audit2allow -M my-zabbixserver
-- name: resolve SE issue - step 2
-  shell: semodule -i my-zabbixserver.pp  
 - name: Starting services 
   service:
     name: "{{ item }}"

@@ -1,8 +1,0 @@
----
-- hosts: zabbix-test-vm02
-  become: yes
-  roles:
-     - mariadb_setup
-     #- http_setup
-
-

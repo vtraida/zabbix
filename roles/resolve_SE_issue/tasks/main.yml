@@ -1,0 +1,71 @@
+---
+
+#- name: Resolving issue > "setroubleshoot: SELinux is preventing /usr/sbin/zabbix_server_mysql from create 
+#access on the sock_file zabbix_server_alerter.sock. For complete SELinux messages run>
+#sealert -l 3fe98020-a54c-47ea-a998-acd734d8b453
+#Aug 28 13:46:53 localhost python> SELinux is preventing /usr/sbin/zabbix_server_mysql from create access 
+#on the sock_file zabbix_server_alerter.sock.#012#012*****  
+#Plugin catchall (100. confidence) suggests
+#012#012If you believe that zabbix_server_mysql should be allowed create access on the 
+#zabbix_server_alerter.sock sock_file by default.#012Then you should report this as a bug.#012You can generate
+# a local policy module to allow this access.#012Do#012allow this access for now by executing:
+#012# ausearch -c 'zabbix_server' --raw | audit2allow -M my-zabbixserver#012# semodule -i my-zabbixserver.pp#012"
+
+- name: Creating directory for module
+  file:
+    path: "{{item}}"
+    state: directory
+    mode: 0755
+  with_items:
+  - /home/vagrant/module1
+  - /home/vagrant/module2
+  - /home/vagrant/module3
+  tags:
+     - semodule  
+- name: Waiting1 before SELinux fix
+  pause:
+    minutes: 2
+- name: Resolve SE issue - step 1-0
+  shell: cat /var/log/audit/audit.log | audit2allow -M zabbix_server
+  args:
+    chdir: /home/vagrant/module1
+- name: Waiting before SELinux fix
+  pause:
+    minutes: 2
+- name: Resolving SE issue - step 1-1
+  shell: semodule -i zabbix_server.pp 
+  args:
+    chdir: /home/vagrant/module1
+
+- name: Reboot the machine
+  shell: nohup bash -c "sleep 2s && shutdown -r now" &
+
+- name: Wait for machine to come back
+  wait_for_connection:
+    timeout: 840
+    delay: 20
+#- name: Rebooting server
+#  command: /sbin/reboot
+#- name: Waiting for the server to finish rebooting
+#  sudo: no
+#  local_action: wait_for host="{{ zabbix-test-vm02 }}" search_regex=OpenSSH port=22 timeout=300
+- name: Resolve SE issue - step 2-0
+  shell: cat /var/log/audit/audit.log | audit2allow -M zabbix_server
+  args:
+    chdir: /home/vagrant/module2
+- name: Resolving SE issue - step 2-1
+  shell: semodule -i zabbix_server.pp 
+  args:
+    chdir: /home/vagrant/module2
+- name: Resolve SE issue - step 3-0
+  shell: cat /var/log/audit/audit.log | audit2allow -M zabbix_server
+  args:
+    chdir: /home/vagrant/module3
+  tags:
+     - semodule    
+- name: Resolving SE issue - step 3-1
+  shell: semodule -i zabbix_server.pp 
+  args:
+    chdir: /home/vagrant/module3    
+  tags:
+     - semodule
